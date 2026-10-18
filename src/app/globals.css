@@ -258,6 +258,12 @@ button:active:not(:disabled) { transform: scale(0.98); }
 .checker.bad { align-self: flex-start; padding: 4px 10px; border-radius: 999px; background: var(--red-bg); color: var(--red); }
 .checker.bad .cDot { background: var(--red); }
 
+.push { display: grid; gap: 4px; margin-top: -4px; }
+.pushRow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 44px; }
+.pushName { font-size: 14px; font-weight: 500; color: var(--ink); }
+.pushBtns { display: flex; gap: 8px; margin-left: auto; }
+.btn.sm { height: 36px; padding: 0 12px; font-size: 13px; }
+
 .panelHelp { margin-top: 4px; border-top: 1px solid var(--line); }
 .acc { border-bottom: 1px solid var(--line); }
 .acc summary {

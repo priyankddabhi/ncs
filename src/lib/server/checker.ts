@@ -11,6 +11,7 @@ import { INTERVALS, KEYS, istDateTime, istTime, type Alert, type CheckStatus, ty
 import { store } from "../store.ts";
 import { getHoldings, getInterval, holdingView, whyLine } from "./advice.ts";
 import { loadMarket, MARKET_LIST, STEPS_PER_MARKET } from "./markets.ts";
+import { alertMessage, sendToAll } from "./push.ts";
 
 export interface AlertLog { state: Record<string, string>; alerts: Alert[] }
 
@@ -19,11 +20,18 @@ export const TOTAL_STEPS = STEPS_PER_MARKET * MARKET_LIST.length + 2; // + compa
 const MAX_ALERTS = 100;
 
 /**
- * STEP 4 HOOK: send the new alerts to the phone (web push). Does nothing yet.
+ * Send the new alerts to the phones with alerts on (web push, one message per alert; see push.ts).
  * Called once per check, after the alerts are saved, only when there is at least one new alert.
+ * Never throws: a push problem is logged and the check carries on.
  */
 export async function notify(alerts: Alert[]): Promise<void> {
-  void alerts;
+  try {
+    if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return; // phone alerts not set up
+    const r = await sendToAll(alerts.map(alertMessage));
+    if (r.failed) console.error(`push: ${r.sent} sent, ${r.failed} failed, ${r.removed} removed: ${r.errors.join("; ")}`);
+  } catch (e) {
+    console.error(`push: ${e instanceof Error ? e.message : String(e)}`);
+  }
 }
 
 export interface CheckResult { alerts: Alert[]; status: CheckStatus }

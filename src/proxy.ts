@@ -21,6 +21,7 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  // everything except Next.js files, the app icons and the manifest (needed before login to install the app)
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon-192.png|icon-512.png|manifest.webmanifest).*)"],
+  // everything except Next.js files, the app icons, the notification badge, the manifest (needed before login to
+  // install the app) and the service worker (the browser loads it without following a redirect)
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon-192.png|icon-512.png|badge-96.png|manifest.webmanifest|sw.js).*)"],
 };

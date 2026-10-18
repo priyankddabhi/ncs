@@ -1,6 +1,6 @@
 "use client";
 /**
- * Slide-in side panel (menu icon): Refresh, the "Check every" timer, the one checker status line, "My holdings"
+ * Slide-in side panel (menu icon): Refresh, the "Check every" timer, the one checker status line, "Phone alerts", "My holdings"
  * (folded: add / edit / remove per market), the glossary (folded) and the disclaimer. Modal: focus-trapped, closes on the close icon, the backdrop or Esc.
  */
 import { useEffect, useRef, useState } from "react";
@@ -9,6 +9,7 @@ import { INTERVALS, istDateTime, type StatusResponse } from "@/lib/shared.ts";
 import { checkerLine } from "./fmt.ts";
 import { Disclaimer, Glossary } from "./Glossary.tsx";
 import { HoldingsSection, type Holdings } from "./Holdings.tsx";
+import { PhoneAlerts } from "./PhoneAlerts.tsx";
 import { CloseIcon, RefreshIcon } from "./Icons.tsx";
 
 const FOCUSABLE = 'button:not([disabled]), select:not([disabled]), input:not([disabled]), summary, a[href], [tabindex]:not([tabindex="-1"])';
@@ -98,6 +99,8 @@ export function SidePanel({ open, onClose, busy, onRefresh, interval, onInterval
           <span className="cDot" aria-hidden="true" />
           {line.text}
         </p>
+
+        <PhoneAlerts />
 
         <div className="panelHelp">
           <HoldingsSection markets={markets} holdings={holdings} onSaved={onSaved} />

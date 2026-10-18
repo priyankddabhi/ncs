@@ -1,6 +1,7 @@
 /**
  * Writes public/icon-192.png and public/icon-512.png (PWA icons) with built-in modules only:
- * a dark square with a green rising line. Run from the web folder:  node scripts/make-icons.ts
+ * a dark square with a green rising line; and public/badge-96.png, the small monochrome notification badge for Android
+ * (white line on transparent: Android shows only its shape in the status bar). Run from the web folder:  node scripts/make-icons.ts
  */
 import { writeFileSync } from "node:fs";
 import { deflateSync } from "node:zlib";
@@ -32,24 +33,26 @@ function distToSeg(px: number, py: number, [ax, ay]: number[], [bx, by]: number[
   return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
 }
 
-function png(size: number): Buffer {
-  const raw = Buffer.alloc((size * 3 + 1) * size);
-  const w = 0.045; // half line width
+function png(size: number, badge = false): Buffer {
+  const ch = badge ? 4 : 3; // badge: RGBA, white with the line as alpha
+  const raw = Buffer.alloc((size * ch + 1) * size);
+  const w = badge ? 0.07 : 0.045; // half line width (thicker on the tiny badge)
   for (let y = 0; y < size; y++) {
-    raw[y * (size * 3 + 1)] = 0; // filter: none
+    raw[y * (size * ch + 1)] = 0; // filter: none
     for (let x = 0; x < size; x++) {
       const px = (x + 0.5) / size, py = (y + 0.5) / size;
       let d = Infinity;
       for (let i = 0; i < PTS.length - 1; i++) d = Math.min(d, distToSeg(px, py, PTS[i], PTS[i + 1]));
       d = Math.min(d, Math.hypot(px - 0.8, py - 0.32) - 0.03); // dot at the end
       const a = Math.max(0, Math.min(1, (w - d) * size + 0.5)); // anti-aliased edge
-      const o = y * (size * 3 + 1) + 1 + x * 3;
+      const o = y * (size * ch + 1) + 1 + x * ch;
+      if (badge) { raw.fill(255, o, o + 3); raw[o + 3] = Math.round(255 * a); continue; }
       for (let c = 0; c < 3; c++) raw[o + c] = Math.round(BG[c] + (FG[c] - BG[c]) * a);
     }
   }
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(size, 0); ihdr.writeUInt32BE(size, 4);
-  ihdr[8] = 8; ihdr[9] = 2; // 8-bit RGB
+  ihdr[8] = 8; ihdr[9] = badge ? 6 : 2; // 8-bit RGBA / RGB
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     chunk("IHDR", ihdr), chunk("IDAT", deflateSync(raw, { level: 9 })), chunk("IEND", Buffer.alloc(0)),
@@ -60,3 +63,5 @@ for (const s of [192, 512]) {
   writeFileSync(new URL(`../public/icon-${s}.png`, import.meta.url), png(s));
   console.log(`public/icon-${s}.png`);
 }
+writeFileSync(new URL("../public/badge-96.png", import.meta.url), png(96, true));
+console.log("public/badge-96.png");

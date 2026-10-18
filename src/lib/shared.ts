@@ -22,6 +22,8 @@ export const KEYS = {
   alerts: "alerts",
   status: "status",
   heartbeat: "heartbeat",
+  /** Phone web-push subscriptions (src/lib/server/push.ts). */
+  push: "push",
 } as const;
 
 export interface Settings { interval: string }
